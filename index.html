@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css' rel='stylesheet' />
+
+    <style type="text/css">
+        body {
+            background-color: antiquewhite;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .poiDisplay {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            min-height: 50px;
+            width: 300px;
+            border-radius: 10px;
+            background-color: white;
+            padding: 2px;
+            max-height: calc(100vh - 20px);
+            overflow: auto;
+            z-index: 100;
+        }
+
+        .poiimg {
+            display: block;
+            width: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- page -->
+    TEST
+
+    <div id="map"></div>
+    <div id="poiInfoContainer" class="poiDisplay" style="display: none;"></div>
+
+
+
+    <!-- Javascript file -->
+    <script type="text/javascript" src="index.js"></script>
+</body>
+
+</html>
