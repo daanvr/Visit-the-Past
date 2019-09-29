@@ -54,16 +54,30 @@ function loadJson() {
             data: loadedGeoJson
         });
         map.addLayer({
+            "id": "poi-shadow",
+            "source": "mapPoints",
+            "type": "circle",
+            "paint": {
+                "circle-radius": 11,
+                "circle-color": "hsl(188, 0%, 0%)",
+                "circle-opacity": 0.4,
+                "circle-stroke-width": 0,
+                "circle-stroke-opacity": 0.2,
+                "circle-translate": [3, 3],
+                "circle-blur": 0.4
+            }
+        });
+        map.addLayer({
             "id": "poi",
             "source": "mapPoints",
             "type": "circle",
             "paint": {
                 "circle-radius": 10,
-                "circle-color": "#ffffff",
-                "circle-opacity": 0.6,
+                "circle-color": "hsl(188, 0%, 100%)",
+                "circle-opacity": 0.5,
                 "circle-stroke-width": 1,
-                "circle-stroke-color": "#acd6dc",
-                "circle-stroke-opacity": 0.8
+                "circle-stroke-opacity": 0.7,
+                "circle-stroke-color": "hsl(0, 0%, 100%)"
             }
         });
         map.on("click", "poi", function (e) {
