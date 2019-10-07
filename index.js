@@ -1,5 +1,5 @@
-console.log("Start Script");
-
+var loadedImg = false;
+var imgUrl;
 
 
 // printPinterestRSS();
@@ -33,22 +33,23 @@ var map = new mapboxgl.Map({
 });
 var loadedGeoJson;
 var mapAlreadyLoaded = false;
-$(document).ready(function(){
-    map.on('styledata', function() {
+$(document).ready(function () {
+    map.on('styledata', function () {
         if (mapAlreadyLoaded) {
         } else {
             mapAlreadyLoaded = true;
             loadJson();
         }
     });
-  });
+});
 
 function loadJson() {
 
-    $.getJSON("https://raw.githubusercontent.com/daanvr/test/master/visit-the-past-data.geojson", function () { }).done(function (jsonDataContainer) {
+    // $.getJSON("https://raw.githubusercontent.com/daanvr/test/master/visit-the-past-data.geojson", function () { }).done(function (jsonDataContainer) {
+    $.getJSON("https://raw.githubusercontent.com/daanvr/test/master/wiki_data_1385.geojson", function () { }).done(function (jsonDataContainer) {
         loadedGeoJson = jsonDataContainer;
         console.log(loadedGeoJson.features.length + " feature(s) are loaded.")
-        
+
         map.addSource('mapPoints', {
             type: 'geojson',
             data: loadedGeoJson
@@ -80,28 +81,84 @@ function loadJson() {
                 "circle-stroke-color": "hsl(0, 0%, 100%)"
             }
         });
+        map.on("click", function () {
+            $("#poiInfoContainer").hide();
+        });
         map.on("click", "poi", function (e) {
-            var linkUrl = e.features[0].properties.linkUrl;
+
+
+            // console.log(e.features[0].properties.wikiLink);
+            var linkUrl = e.features[0].properties.wikiLink;
+            var wikiTitle = e.features[0].properties.wikiTitle;
             var imgUrl = e.features[0].properties.fotoUrl;
-            var imgTitle = e.features[0].properties.title;
-            var value = '<a href="';
-            value += linkUrl;
-            value += '">';
+            if (imgUrl == undefined || imgUrl == "") {
+                console.log("no img in map data")
+                var imgUrl = getWikiThumbNailImg(e.features[0].properties.wikiTitle, "300");
+            }
+            var imgTitle = e.features[0].properties.wikiTitle;
+            var mapsLink = e.features[0].properties.googleMapsLink;
+            var value = '';
             value += '<img src="';
             value += imgUrl;
             value += '" alt="';
             value += imgTitle;
             value += '" class="poiimg">';
-            value += '</a>';
-            value += '';
-            value += '';
-            value += '';
-            value += '';
             $("#poiInfoContainer").show();
-            $("#poiInfoContainer").html(value);
+            $("#imgContainer").html(value);
             // $(".poiimg").parent().css({"display": "block"});
+            // if (linkUrl === undefined || linkUrl == "") {
+            //     $("#wikipediaBtn").hide();
+            // } else {
+            $("#wikipediaBtn").show();
+            $("#wikipediaBtn").off('click');
+            $("#wikipediaBtn").click(function () { openWiki(wikiTitle); });
+            // }
+            if (mapsLink == undefined || mapsLink == "") {
+                $("#googleMapsBtn").hide();
+            } else {
+                $("#googleMapsBtn").show();
+                $("#googleMapsBtn").off('click');
+                $("#googleMapsBtn").click(function () { openMaps(mapsLink); });
+            }
+
         });
     });
 }
+
+
+function getWikiThumbNailImg(wikiTitle, imgWidth) {
+    loadedImg = false;
+    imgUrl = "";
+
+    if (imgWidth === undefined) { imgWidth = 300 };
+    var wikiTitleUrl = encodeURIComponent(wikiTitle);
+    var queryUrl = "https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pithumbsize=" + imgWidth + "&titles=" + wikiTitleUrl;
+
+    $.getJSON(queryUrl, function () { }).done(function (jsonDataContainer) { // perform the request
+        imgUrl = jsonDataContainer.query.pages[Object.keys(jsonDataContainer.query.pages)[0]].thumbnail.source;
+        loadedImg = true;
+        $(".poiimg").attr('src', imgUrl);
+    });
+}
+
+function openWiki(wikiTitle) {
+    // var url = "https://en.wikipedia.org/wiki/" + wikiTitle.replace(/ /g,"_");
+    var url = "https://en.wikipedia.org/wiki/" + encodeURIComponent(wikiTitle);
+    console.log(url);
+
+    $('#openLink').show();
+    $('#iframe').attr('src', url);
+    setTimeout(function () {
+        $("body").one('click', function () {
+            $('#openLink').hide();
+        });
+    }, 100);
+}
+
+function openMaps(url) {
+    console.log("opengooglemapsnow");
+    window.open(url, '_blank');
+}
+
 
 
