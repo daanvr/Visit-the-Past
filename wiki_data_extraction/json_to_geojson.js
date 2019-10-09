@@ -20,13 +20,19 @@ const militaryFacility = "Q18691599"  // 58.780x
 const ancientGreekTemple = "Q267596"  //117x
 const ancientRomanTemple = "Q867143"  //124x
 const archaeologicalSite = "Q839954"  //124.319x
+const romanArchaeologicalSite = "Q21752084" //
 const name = ""  //
 
-queryWikiData("Q867143", true, false);
+queryWikiData("Q21752084", true, false);
 
 function queryWikiData(Qnumber, labels, limit) {
     var endpointUrl = 'https://query.wikidata.org/sparql',
-        sparqlQuery = "SELECT ?item ?location ?img\n" +
+        sparqlQuery = "SELECT ?item ?location ?img";
+        if (labels) {
+            sparqlQuery += "?itemLabel ?itemDescription" 
+        }
+    
+        sparqlQuery += "\n" +
             "WHERE {\n" +
             "  ?item wdt:P31/wdt:P279* wd:" + Qnumber + " . \n" +
             "   MINUS {?item wdt:P31 wd:Q1640824 . }\n" +
@@ -98,6 +104,12 @@ function transformJsonToGoejson(data) {
             }
             if (data.results.bindings[i].img != undefined) {
                 properties.i = data.results.bindings[i].img.value;
+            }
+            if (data.results.bindings[i].itemLabel != undefined) {
+                properties.l = data.results.bindings[i].itemLabel.value;
+            }
+            if (data.results.bindings[i].itemDescription != undefined) {
+                properties.d = data.results.bindings[i].itemDescription.value;
             }
             // const properties = {
             //     "q": data.results.bindings[i].item.value,
