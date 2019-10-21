@@ -46,14 +46,10 @@ $(document).ready(function () {
 function loadJson() {
 
     // $.getJSON("https://raw.githubusercontent.com/daanvr/test/master/visit-the-past-data.geojson", function () { }).done(function (jsonDataContainer) {
-    $.getJSON("https://raw.githubusercontent.com/daanvr/test/master/wiki_data_1385.geojson", function () { }).done(function (jsonDataContainer) {
+    $.getJSON("https://raw.githubusercontent.com/daanvr/test/master/militaryFacility_Q18691599_x28168.geojson", function () { }).done(function (jsonDataContainer) {
         loadedGeoJson = jsonDataContainer;
         console.log(loadedGeoJson.features.length + " feature(s) are loaded.")
 
-        map.addSource('mapPoints', {
-            type: 'geojson',
-            data: loadedGeoJson
-        });
         map.addSource('imgPoints', {
             type: 'geojson',
             data: {
@@ -61,33 +57,38 @@ function loadJson() {
                 "features": []
             }
         });
-        map.addLayer({
-            "id": "poi-shadow",
-            "source": "mapPoints",
-            "type": "circle",
-            "paint": {
-                "circle-radius": 11,
-                "circle-color": "hsl(188, 0%, 0%)",
-                "circle-opacity": 0.4,
-                "circle-stroke-width": 0,
-                "circle-stroke-opacity": 0.2,
-                "circle-translate": [3, 3],
-                "circle-blur": 0.4
-            }
-        });
-        map.addLayer({
-            "id": "poi",
-            "source": "mapPoints",
-            "type": "circle",
-            "paint": {
-                "circle-radius": 10,
-                "circle-color": "hsl(188, 0%, 100%)",
-                "circle-opacity": 0.5,
-                "circle-stroke-width": 1,
-                "circle-stroke-opacity": 0.7,
-                "circle-stroke-color": "hsl(0, 0%, 100%)"
-            }
-        });
+
+        // map.addSource('mapPoints', {
+        //     type: 'geojson',
+        //     data: loadedGeoJson
+        // });
+        // map.addLayer({
+        //     "id": "poi-shadow",
+        //     "source": "mapPoints",
+        //     "type": "circle",
+        //     "paint": {
+        //         "circle-radius": 11,
+        //         "circle-color": "hsl(188, 0%, 0%)",
+        //         "circle-opacity": 0.4,
+        //         "circle-stroke-width": 0,
+        //         "circle-stroke-opacity": 0.2,
+        //         "circle-translate": [3, 3],
+        //         "circle-blur": 0.4
+        //     }
+        // });
+        // map.addLayer({
+        //     "id": "poi",
+        //     "source": "mapPoints",
+        //     "type": "circle",
+        //     "paint": {
+        //         "circle-radius": 10,
+        //         "circle-color": "hsl(188, 0%, 100%)",
+        //         "circle-opacity": 0.5,
+        //         "circle-stroke-width": 1,
+        //         "circle-stroke-opacity": 0.7,
+        //         "circle-stroke-color": "hsl(0, 0%, 100%)"
+        //     }
+        // });
         map.addLayer({
             "id": "imgs",
             "source": "imgPoints",
@@ -116,14 +117,14 @@ function loadJson() {
 
 
         });
-        map.on("click", "poi", function (e) {
+        map.on("click", "data-point", function (e) {
             e.originalEvent.cancelBubble = true;
 
 
             // console.log(e.features[0].properties.wikiLink);
             var linkUrl = e.features[0].properties.wikiLink;
             var wikiTitle = e.features[0].properties.wikiTitle;
-            var imgUrl = e.features[0].properties.fotoUrl;
+            var imgUrl = e.features[0].properties.i;
             if (imgUrl == undefined || imgUrl == "") {
                 console.log("no img in map data")
                 var imgUrl = getWikiThumbNailImg(e.features[0].properties.wikiTitle, "300");
@@ -139,13 +140,13 @@ function loadJson() {
             $("#poiInfoContainer").show();
             $("#imgContainer").html(value);
             // $(".poiimg").parent().css({"display": "block"});
-            // if (linkUrl === undefined || linkUrl == "") {
-            //     $("#wikipediaBtn").hide();
-            // } else {
-            $("#wikipediaBtn").show();
-            $("#wikipediaBtn").off('click');
-            $("#wikipediaBtn").click(function () { openWiki(wikiTitle); });
-            // }
+            if (linkUrl === undefined || linkUrl == "") {
+                $("#wikipediaBtn").hide();
+            } else {
+                $("#wikipediaBtn").show();
+                $("#wikipediaBtn").off('click');
+                $("#wikipediaBtn").click(function () { openWiki(wikiTitle); });
+            }
             if (mapsLink == undefined || mapsLink == "") {
                 $("#googleMapsBtn").hide();
             } else {
@@ -155,14 +156,14 @@ function loadJson() {
             }
 
         });
-        map.on("dblclick", "poi", function (e) {
+        map.on("dblclick", "data-point", function (e) {
             map.flyTo({
                 center: [
-                e.lngLat.lng,
-                e.lngLat.lat
+                    e.lngLat.lng,
+                    e.lngLat.lat
                 ],
                 zoom: 15
-        });
+            });
         });
         map.on("click", function (e) {
             if (e.originalEvent.cancelBubble) {
@@ -178,10 +179,10 @@ function loadJson() {
         map.on('mouseleave', 'imgs', function () {
             map.getCanvas().style.cursor = '';
         });
-        map.on('mouseenter', 'poi', function () {
+        map.on('mouseenter', 'data-point', function () {
             map.getCanvas().style.cursor = 'pointer';
         });
-        map.on('mouseleave', 'poi', function () {
+        map.on('mouseleave', 'data-point', function () {
             map.getCanvas().style.cursor = '';
         });
     });
