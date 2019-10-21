@@ -23,8 +23,16 @@ Selected = [
 //-bunqers
 
 
+//Location based wikidata query. what is arround a Qnumber
+"https://query.wikidata.org/#SELECT%20%3Fplace%20%3FplaceLabel%20%3Flocation%20WHERE%0A%7B%0A%20%20wd%3AQ64436%20wdt%3AP625%20%3FarcLoc%20.%20%0A%20%20SERVICE%20wikibase%3Aaround%20%7B%20%0A%20%20%20%20%20%20%3Fplace%20wdt%3AP625%20%3Flocation%20.%20%0A%20%20%20%20%20%20bd%3AserviceParam%20wikibase%3Acenter%20%3FarcLoc%20.%20%0A%20%20%20%20%20%20bd%3AserviceParam%20wikibase%3Aradius%20%221%22%20.%20%0A%20%20%7D%20%0A%20%20SERVICE%20wikibase%3Alabel%20%7B%0A%20%20%20%20bd%3AserviceParam%20wikibase%3Alanguage%20%22en%22%20.%20%0A%20%20%7D%0A%7D"
+//Coordinates based wikidata search. what is arround this coordinates
+"https://query.wikidata.org/#SELECT%20%3Fplace%20%3FplaceLabel%20%3Flocation%20%3Fimg%20WHERE%0A%7B%0A%20%20wd%3AQ29002313%20wdt%3AP625%20%3FarcLoc%20.%20%0A%20%20SERVICE%20wikibase%3Aaround%20%7B%20%0A%20%20%20%20%20%20%3Fplace%20wdt%3AP625%20%3Flocation%20.%20%0A%20%20%20%20%20%20bd%3AserviceParam%20wikibase%3Acenter%20%22Point%282.295%2048.8738%29%22%5E%5Egeo%3AwktLiteral%20.%20%0A%20%20%20%20%20%20bd%3AserviceParam%20wikibase%3Aradius%20%224%22%20.%20%0A%20%20%7D%20%0A%20%20OPTIONAL%20%7B%3Fplace%20wdt%3AP18%20%3Fimg%7D%0A%20%20SERVICE%20wikibase%3Alabel%20%7B%0A%20%20%20%20bd%3AserviceParam%20wikibase%3Alanguage%20%22en%22%20.%20%0A%20%20%7D%0A%7D"
 
 
+//Location based img search on wikibase
+"https://commons.wikimedia.org/w/api.php?format=jsonfm&action=query&generator=geosearch&ggsprimary=all&ggsnamespace=6&ggsradius=500&ggscoord=51.5|11.95&prop=imageinfo&iilimit=1&iiprop=url&iiurlwidth=200&iiurlheight=200"
+//withouf thumbnails:
+"https://commons.wikimedia.org/w/api.php?format=jsonfm&action=query&list=geosearch&gsprimary=all&gsnamespace=6&gsradius=500&gscoord=51.5|11.95"
 
 
 

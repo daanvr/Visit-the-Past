@@ -28,8 +28,8 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiZGFhbnZyIiwiYSI6ImNrMTNkYzUyMTA3MDQzYm05bWRjd
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/daanvr/cjz5i3bas0xxe1cqh85yp81s2',
-    zoom: 2,
-    center: [20, 25]
+    zoom: 3.5,
+    center: [15, 40]
 });
 var loadedGeoJson;
 var mapAlreadyLoaded = false;
@@ -53,6 +53,13 @@ function loadJson() {
         map.addSource('mapPoints', {
             type: 'geojson',
             data: loadedGeoJson
+        });
+        map.addSource('imgPoints', {
+            type: 'geojson',
+            data: {
+                "type": "FeatureCollection",
+                "features": []
+            }
         });
         map.addLayer({
             "id": "poi-shadow",
@@ -81,10 +88,36 @@ function loadJson() {
                 "circle-stroke-color": "hsl(0, 0%, 100%)"
             }
         });
-        map.on("click", function () {
-            $("#poiInfoContainer").hide();
+        map.addLayer({
+            "id": "imgs",
+            "source": "imgPoints",
+            "type": "circle",
+            "paint": {
+                "circle-radius": 11,
+                "circle-color": "#ffc400",
+                "circle-opacity": 0.4,
+                "circle-stroke-width": 0,
+                "circle-stroke-opacity": 0.2
+            }
+        });
+        map.on("click", "imgs", function (e) {
+            console.log("show big img");
+            console.log(e.features)
+            e.originalEvent.cancelBubble = true;
+
+            var imgHtml = '<img src="' + e.features[0].properties.url + '?width=700px" alt="' + e.features[0].properties.label + '" class="popupImg">';
+            $("#openLink").html(imgHtml);
+            $('#openLink').show();
+            setTimeout(function () {
+                $("body").one('click', function () {
+                    $('#openLink').hide();
+                });
+            }, 100);
+
+
         });
         map.on("click", "poi", function (e) {
+            e.originalEvent.cancelBubble = true;
 
 
             // console.log(e.features[0].properties.wikiLink);
@@ -122,9 +155,184 @@ function loadJson() {
             }
 
         });
+        map.on("dblclick", "poi", function (e) {
+            map.flyTo({
+                center: [
+                e.lngLat.lng,
+                e.lngLat.lat
+                ],
+                zoom: 15
+        });
+        });
+        map.on("click", function (e) {
+            if (e.originalEvent.cancelBubble) {
+                return;
+            }
+            $("#poiInfoContainer").hide();
+            loadLocalImages(e);
+
+        });
+        map.on('mouseenter', 'imgs', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'imgs', function () {
+            map.getCanvas().style.cursor = '';
+        });
+        map.on('mouseenter', 'poi', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'poi', function () {
+            map.getCanvas().style.cursor = '';
+        });
     });
 }
 
+function loadLocalImages(mapData) {
+    console.log(mapData);
+    console.log(mapData.lngLat.lng);
+    console.log(mapData.lngLat.lat);
+    clickLngLat = mapData.lngLat;
+    imgs = []; //rray of objects
+
+    wikidataImgs(clickLngLat);
+    console.log("@0");
+    // imgs.push(WikimediaImgs(clickLngLat));
+
+}
+
+function wikidataImgs(clickLngLat) {
+    console.log("@1");
+
+
+    //the real search moment
+    function makeSPARQLQuery(endpointUrl, sparqlQuery, doneCallback) {
+        console.log("@2");
+        var settings = {
+            headers: { Accept: 'application/sparql-results+json' },
+            data: { query: sparqlQuery }
+        };
+        return $.ajax(endpointUrl, settings).then(doneCallback);
+    }
+
+    console.log("@3");
+    queryWikiData(clickLngLat);
+
+    function queryWikiData(clickLngLat) {
+        console.log("@4");
+        var endpointUrl = 'https://query.wikidata.org/sparql',
+            sparqlQuery = "SELECT ?place ?placeLabel ?placeDescription ?location ?img WHERE\n" +
+                "{\n" +
+                "  SERVICE wikibase:around { \n" +
+                "      ?place wdt:P625 ?location . \n" +
+                "      bd:serviceParam wikibase:center \"Point(" + clickLngLat.lng + " " + clickLngLat.lat + ")\"^^geo:wktLiteral . \n" +
+                "      bd:serviceParam wikibase:radius \"2\" . \n" +
+                "  }" +
+                "  ?place wdt:P18 ?img\n" +
+                "  SERVICE wikibase:label {\n" +
+                "    bd:serviceParam wikibase:language \"en\" . \n" +
+                "  }\n" +
+                "}";
+
+
+        makeSPARQLQuery(endpointUrl, sparqlQuery, function (data) {
+            console.log("@5");
+            console.log("wikidata respons:");
+            console.log(data);
+            // console.log( data.results.bindings[0].place.value );
+            // console.log( data.results.bindings[0].placeLabel.value );
+            // console.log( data.results.bindings[0].placeDescription.value );
+            // console.log( data.results.bindings[1].location.value );
+            // console.log( data.results.bindings[1].img.value );
+            // transformJsonToGoejson(data);
+            var wikidataImgs = []
+            for (d in data.results.bindings) {
+                var cleanLongLat = data.results.bindings[d].location.value.replace("Point(", "");
+                cleanLongLat = cleanLongLat.replace(")", "");
+                const lonlat = cleanLongLat.split(" ")
+                const lon = lonlat[0];           //where in te Json is the Longitude
+                const lat = lonlat[1];           //where in te Json is the Latitude
+                var label = "";
+                var description = "";
+                if (data.results.bindings[d].placeLabel == undefined || data.results.bindings[d].placeLabel == "") {
+                } else {
+                    label = data.results.bindings[d].placeLabel.value
+                }
+                if (data.results.bindings[d].placeDescription == undefined || data.results.bindings[d].placeDescription == "") {
+                } else {
+                    description = data.results.bindings[d].placeDescription.value
+                }
+
+
+                value = {
+                    lng: lonlat[0],
+                    lat: lonlat[1],
+                    qnbr: data.results.bindings[d].place.value,
+                    label: label,
+                    description: description,
+                    imgUrl: data.results.bindings[d].img.value
+                }
+                wikidataImgs.push(value);
+            }
+            imgGeojson(wikidataImgs, true);
+        }
+        );
+    }
+
+    // return wikidataImgs; //array of objects
+}
+
+function WikidataImgs(clickLngLat) {
+    var wikidataImgs = []
+    exempleImg = {
+        lng: 9.999,
+        lat: 9.999,
+        label: "",
+        description: "",
+        imgUrl: "https://..."
+    }
+    return wikidataImgs; //array of objects
+}
+
+function imgGeojson(newImgs, reset) {
+    console.log("@11")
+    if (reset) {
+        var newGoejson = map.getSource('imgPoints')._data;
+        newGoejson.features = [];
+        map.getSource('imgPoints').setData(newGoejson);
+    }
+    value = {
+        lng: "",
+        lat: "",
+        qnbr: "",
+        label: "",
+        description: "",
+        imgUrl: ""
+    };
+    var newGoejson = map.getSource('imgPoints')._data;
+    for (n in newImgs) {
+        var feature = {
+            "type": "Feature",
+            "properties": {
+                url: newImgs[n].imgUrl,
+                qnbr: newImgs[n].qnbr,
+                label: newImgs[n].label,
+                description: newImgs[n].description,
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    newImgs[n].lng,
+                    newImgs[n].lat
+                ]
+            }
+        };
+        newGoejson.features.push(feature);
+    }
+
+    console.log(newGoejson)
+    map.getSource('imgPoints').setData(newGoejson);
+
+}
 
 function getWikiThumbNailImg(wikiTitle, imgWidth) {
     loadedImg = false;

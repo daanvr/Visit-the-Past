@@ -1,18 +1,18 @@
 
 
-    console.log("Boot");
+console.log("Boot");
 // $.getJSON("https://raw.githubusercontent.com/daanvr/test/master/query-6.json", function () { }).done(function (loadedData) {
 //     console.log("loaded");
 // });
 
 
 
-function makeSPARQLQuery( endpointUrl, sparqlQuery, doneCallback ) {
-	var settings = {
-		headers: { Accept: 'application/sparql-results+json' },
-		data: { query: sparqlQuery }
-	};
-	return $.ajax( endpointUrl, settings ).then( doneCallback );
+function makeSPARQLQuery(endpointUrl, sparqlQuery, doneCallback) {
+    var settings = {
+        headers: { Accept: 'application/sparql-results+json' },
+        data: { query: sparqlQuery }
+    };
+    return $.ajax(endpointUrl, settings).then(doneCallback);
 }
 
 const culturalHeritage = "Q210272" // 485.000x
@@ -23,53 +23,55 @@ const archaeologicalSite = "Q839954"  //124.319x
 const romanArchaeologicalSite = "Q21752084" //
 const name = ""  //
 
-queryWikiData("Q21752084", true, false);
+queryWikiData("Q18691599", true, false);
 
 function queryWikiData(Qnumber, labels, limit) {
     var endpointUrl = 'https://query.wikidata.org/sparql',
         sparqlQuery = "SELECT ?item ?location ?img";
-        if (labels) {
-            sparqlQuery += "?itemLabel ?itemDescription" 
-        }
-    
-        sparqlQuery += "\n" +
-            "WHERE {\n" +
-            "  ?item wdt:P31/wdt:P279* wd:" + Qnumber + " . \n" +
-            "   MINUS {?item wdt:P31 wd:Q1640824 . }\n" +
-            "   MINUS {?item wdt:P31 wd:Q1772    . }\n" +
-            "   MINUS {?item wdt:P31 wd:Q838948  . }\n" +
-            "   MINUS {?item wdt:P31 wd:Q860861  . }\n" +
-            "   MINUS {?item wdt:P31 wd:Q602202  . }\n" +
-            "  OPTIONAL {?item wdt:P625 ?location}\n" +
-            "  OPTIONAL {?item wdt:P18 ?img} \n";
-        if (labels) {} else {
-            sparqlQuery += "#";
-        }
-        sparqlQuery += "SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE], en\".   }\n" +
-            "}\n";
-        if (limit == false) {
-            //no limit
-        } else if (limit === Number) {
-            sparqlQuery += "LIMIT " + limit;
-        } else {
-            sparqlQuery += "LIMIT 10";
-        }
-        
-            // "#LIMIT 1";
+    if (labels) {
+        sparqlQuery += "?itemLabel ?itemDescription"
+    }
 
-        console.log(sparqlQuery);
+    sparqlQuery += "\n" +
+        "WHERE {\n" +
+        "  ?item wdt:P31/wdt:P279* wd:" + Qnumber + " . \n" +
+        // "   MINUS {?item wdt:P31 wd:Q1640824 . }\n" +
+        // "   MINUS {?item wdt:P31 wd:Q1772    . }\n" +
+        // "   MINUS {?item wdt:P31 wd:Q838948  . }\n" +
+        // "   MINUS {?item wdt:P31 wd:Q860861  . }\n" +
+        // "   MINUS {?item wdt:P31 wd:Q602202  . }\n" +
+        // "  OPTIONAL {?item wdt:P625 ?location}\n" +
+        // "  OPTIONAL {?item wdt:P18 ?img} \n";
+        "  ?item wdt:P625 ?location.\n" +
+        "  ?item wdt:P18 ?img. \n";
+    if (labels) { } else {
+        sparqlQuery += "#";
+    }
+    sparqlQuery += "SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE], en\".   }\n" +
+        "}\n";
+    if (limit == false) {
+        //no limit
+    } else if (limit === Number) {
+        sparqlQuery += "LIMIT " + limit;
+    } else {
+        sparqlQuery += "LIMIT 10";
+    }
 
-    makeSPARQLQuery( endpointUrl, sparqlQuery, function( data ) {
-            $( 'body' ).append( $( '<pre>' ).text( JSON.stringify( data ) ) );
-            console.log( data );
-            // console.log( data.results.bindings[0].item.value );
-            // console.log( data.results.bindings[0].location.value );
-            // console.log( data.results.bindings[0].img.value );
-            // console.log( data.results.bindings[1].item.value );
-            // console.log( data.results.bindings[1].location.value );
-            // console.log( data.results.bindings[1].img.value );
+    // "#LIMIT 1";
+
+    console.log(sparqlQuery);
+
+    makeSPARQLQuery(endpointUrl, sparqlQuery, function (data) {
+        $('body').append($('<pre>').text(JSON.stringify(data)));
+        console.log(data);
+        // console.log( data.results.bindings[0].item.value );
+        // console.log( data.results.bindings[0].location.value );
+        // console.log( data.results.bindings[0].img.value );
+        // console.log( data.results.bindings[1].item.value );
+        // console.log( data.results.bindings[1].location.value );
+        // console.log( data.results.bindings[1].img.value );
         transformJsonToGoejson(data);
-        }
+    }
     );
 }
 

@@ -63,3 +63,23 @@ body {
 #wikipediaBtn {
     /* background-color: red; */
 }
+
+.popupImg{
+    max-width: 80vw;
+    max-height: 80vh;
+    display: block;
+}
+
+.openLinkContainer {
+    width: fit-content;
+    height: fit-content;
+    position: fixed;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    padding: 0;
+    margin: 0;
+    box-shadow: 3px 3px 6px black;
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: 200;
+}
