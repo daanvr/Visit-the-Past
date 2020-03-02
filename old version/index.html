@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css' rel='stylesheet' />
+    <link href='index.css' rel='stylesheet' />
+
+    <IfModule mod_headers.c>
+        Header set Referrer-Policy "origin"
+    </IfModule>
+</head>
+
+<body>
+    <!-- page -->
+    TEST
+
+    <div id="map"></div>
+    <div id="poiInfoContainer" class="poiDisplay" style="display: none;">
+        <div id="imgContainer" class="img"></div>
+        <div class="buttonContainer">
+            <button id="wikipediaBtn" class="button" style="display: none;">W</button>
+            <button id="googleMapsBtn" class="button" style="display:none;">M</button>
+        </div>
+    </div>
+    <div id="openLink" class="openLinkContainer" style="display: none;">
+        <!-- <iframe src="" frameborder="0" class="iframe" id="iframe"></iframe> -->
+        
+    </div>
+
+
+    <!-- Javascript file -->
+    <script type="text/javascript" src="index.js"></script>
+</body>
+
+</html>
