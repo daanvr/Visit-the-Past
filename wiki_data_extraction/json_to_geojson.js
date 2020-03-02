@@ -21,6 +21,7 @@ const ancientGreekTemple = "Q267596"  //117x
 const ancientRomanTemple = "Q867143"  //124x
 const archaeologicalSite = "Q839954"  //124.319x
 const romanArchaeologicalSite = "Q21752084" //
+const ancientCity = "Q15661340" //649x
 const name = ""  //
 
 queryWikiData("Q18691599", true, false);
