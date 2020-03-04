@@ -343,6 +343,7 @@ function runQuery() {
             "  UNION {?item wdt:P31/wdt:P279* wd:Q2270185} #Mesoamerican pyramids \n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q1456099} #step pyramid\n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q731966} #nymphaeum \n" +
+            "  UNION {?item wdt:P31/wdt:P279* wd:Q1473950} #stepwell \n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q3411290} #smooth-sided pyramid\n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q200141} #necropolis v\n" +
             // "  UNION {?item wdt:P31/wdt:P279* wd:Q427287} #Wat \n" +   //To many modern results
