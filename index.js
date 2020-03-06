@@ -344,6 +344,8 @@ function runQuery() {
             "  UNION {?item wdt:P31/wdt:P279* wd:Q1456099} #step pyramid\n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q731966} #nymphaeum \n" +
             "  UNION {?item wdt:P361/wdt:P279* wd:Q38888} #Olympia \n" +
+            "  UNION {?item wdt:P361/wdt:P279* wd:Q43332} #Pompeii \n" +
+            "  UNION {?item wdt:P31/wdt:P279* wd:Q6581615} #thermae  \n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q1473950} #stepwell \n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q3411290} #smooth-sided pyramid\n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q200141} #necropolis v\n" +
