@@ -364,6 +364,7 @@ function runQuery() {
             "  UNION {?item wdt:P5008/wdt:P279* wd:Q68074438} #WikiProject Livius \n" +
             "  UNION {?item wdt:P2596/wdt:P279* wd:Q220594} #Nabataeans  \n" +
             "  UNION {?item wdt:P361/wdt:P279* wd:Q163607} #Angkor \n" +
+            "  UNION {?item wdt:P361/wdt:P279* wd:Q1493784} #Chemtou, archaeological site in Tunisia \n" +
             "  UNION {?item wdt:P361/wdt:P279* wd:Q3378708} #Pheradi Majius \n" +
             // "  UNION {?item wdt:P31/wdt:P279* wd:Q665247} #hypogeum \n" +
             // "  UNION {?item wdt:P31/wdt:P279* wd:Q665247} #hypogeum \n" +
