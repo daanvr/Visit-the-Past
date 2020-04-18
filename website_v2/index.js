@@ -315,7 +315,7 @@ function addPointToQnbrGeojson(LngLat, Qnbr) {
 
 
 runQuery();
-function runMegaQuery() {
+function runQuery() {
     function makeSPARQLQuery(endpointUrl, sparqlQuery, doneCallback) {
         var settings = {
             headers: { Accept: 'application/sparql-results+json' },
@@ -326,7 +326,7 @@ function runMegaQuery() {
 
     var endpointUrl = 'https://query.wikidata.org/sparql',
         sparqlQuery = "#defaultView:Map\n" +
-            "SELECT DISTINCT ?item ?itemLabel ?itemDescription ?geo ?img ?commons ?instanceOf ?instanceOfLabel ?sitelink WHERE {\n" +
+            "SELECT DISTINCT ?item ?itemLabel ?itemDescription ?geo ?img ?commons ?instanceOfLabel ?sitelink WHERE {\n" +
             "  # \"instance of\" \"Roman amphitheatre\" or(UNION) \"Greek theatre\" or one of it's subclasses(/wdt:P279*)\n" +
             "  {?item wdt:P31/wdt:P279* wd:Q7362268.} #Roman amphitheatre\n" +
             "  UNION {?item wdt:P31/wdt:P279* wd:Q2860319} #Greek Theater\n" +
@@ -388,44 +388,7 @@ function runMegaQuery() {
             "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE],en\". }\n" +
             "\n" +
             "}\n" +
-            "LIMIT 10000";
-
-    makeSPARQLQuery(endpointUrl, sparqlQuery, function (data) {
-        // $('body').append($('<pre>').text(JSON.stringify(data)));
-        // console.log(data);
-        processQueryResults(data);
-
-    }
-    );
-
-}
-function runQuery(searchQnumber) {
-    if (searchQnumber === undefined) {
-        searchQnumber = "Q15661340";
-    }
-    function makeSPARQLQuery(endpointUrl, sparqlQuery, doneCallback) {
-        var settings = {
-            headers: { Accept: 'application/sparql-results+json' },
-            data: { query: sparqlQuery }
-        };
-        return $.ajax(endpointUrl, settings).then(doneCallback);
-    }
-
-    var endpointUrl = 'https://query.wikidata.org/sparql',
-        sparqlQuery = "#defaultView:Map\n" +
-            "SELECT DISTINCT ?item ?itemLabel ?itemDescription ?geo ?img ?commons ?instanceOf ?instanceOfLabel ?sitelink WHERE {\n" +
-            "  ?item wdt:P31/wdt:P279* wd:" + searchQnumber + ".\n" +
-            // "  {?item wdt:P31/wdt:P279* wd:Q7362268.} #Roman amphitheatre\n" +
-            // "  UNION {?item wdt:P31/wdt:P279* wd:Q2860319} #Greek Theater\n" +
-            "  ?item wdt:P625 ?geo . #Filter on \"has a location\"\n" +
-            "  OPTIONAL {?item wdt:P18 ?img}. # if result has a location, get it\n" +
-            "  OPTIONAL {?item wdt:P373 ?commons}. # wiki commons img categorie\n" +
-            "  OPTIONAL {?item wdt:P31 ?instanceOf}. #Hat is it part of?\n" +
-            "  OPTIONAL { ?sitelink schema:about ?item.\n" +
-            "    ?sitelink schema:isPartOf <https://en.wikipedia.org/>. }\n" +
-            "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE],en\". }\n" +
-            "}\n" +
-            "LIMIT 10000";
+            "";
 
     makeSPARQLQuery(endpointUrl, sparqlQuery, function (data) {
         // $('body').append($('<pre>').text(JSON.stringify(data)));
@@ -439,7 +402,7 @@ function runQuery(searchQnumber) {
 function processQueryResults(data) {
     //remove duplicates
 
-
+    resultsFromQuery = [];//empties result array
     for (d in data.results.bindings) {
         var result = {};
         result.qnumber = qnumberExtraction(data.results.bindings[d].item.value);
@@ -452,68 +415,16 @@ function processQueryResults(data) {
         if (data.results.bindings[d].commons != undefined) { result.commonsurl = "https://commons.wikimedia.org/wiki/Category:" + encodeURIComponent(data.results.bindings[d].commons.value); }
         if (data.results.bindings[d].itemLabel != undefined) { result.label = data.results.bindings[d].itemLabel.value; }
         if (data.results.bindings[d].itemDescription != undefined) { result.description = data.results.bindings[d].itemDescription.value; }
-        if (data.results.bindings[d].instanceOf != undefined) { result.instanceof = [qnumberExtraction(data.results.bindings[d].instanceOf.value)]; }
-        if (data.results.bindings[d].instanceOfLabel != undefined) { result.instanceofLabel = [data.results.bindings[d].instanceOfLabel.value]; }
+        if (data.results.bindings[d].instanceOfLabel != undefined) { result.instanceof = data.results.bindings[d].instanceOfLabel.value; }
 
         resultsFromQuery.push(result);//pushes every result into the array
-        if (ResultsObject[result.qnumber] === undefined) {
-            ResultsObject[result.qnumber] = result;
-        } else {
-            ResultsObject[result.qnumber].instanceof = $.merge(ResultsObject[result.qnumber].instanceof, result.instanceof);
-            ResultsObject[result.qnumber].instanceof = onlyUniquesInArray(ResultsObject[result.qnumber].instanceof);
-            ResultsObject[result.qnumber].instanceofLabel = $.merge(ResultsObject[result.qnumber].instanceofLabel, result.instanceofLabel);
-            ResultsObject[result.qnumber].instanceofLabel = onlyUniquesInArray(ResultsObject[result.qnumber].instanceofLabel);
-
-        }
+        ResultsObject[result.qnumber] = result;
         // buildResultsObject(result);
     }
-
-    relatedInstanceop();
-    console.log("query done");
-    // console.log(ResultsObject);
+    console.log(ResultsObject);
     // console.log(resultsFromQuery);
-    // buildGeojsonFromQueryResults();
-    buildimgColumns();
+    buildGeojsonFromQueryResults();
 }
-
-function relatedInstanceop() {
-    var allInstanceOfLabels = [];
-    var objectOfallInstanceOfLabelsWithCounter = {}
-    for (i in resultsFromQuery) {
-        allInstanceOfLabels = $.merge(allInstanceOfLabels, resultsFromQuery[i].instanceofLabel)
-    }
-    for (a in allInstanceOfLabels) {
-        if (objectOfallInstanceOfLabelsWithCounter[allInstanceOfLabels[a]] === undefined) {
-            objectOfallInstanceOfLabelsWithCounter[allInstanceOfLabels[a]] = 1;
-        } else {
-            objectOfallInstanceOfLabelsWithCounter[allInstanceOfLabels[a]] = objectOfallInstanceOfLabelsWithCounter[allInstanceOfLabels[a]] + 1
-        }
-    }
-    keysSorted = Object.keys(objectOfallInstanceOfLabelsWithCounter).sort(function(a,b){return objectOfallInstanceOfLabelsWithCounter[b]-objectOfallInstanceOfLabelsWithCounter[a]})
-    var test = {}
-    for (k in keysSorted) {
-        test[keysSorted[k]] = objectOfallInstanceOfLabelsWithCounter[keysSorted[k]];
-    }
-    console.log(test);
-    // console.log(objectOfallInstanceOfLabelsWithCounter);
-    console.log(onlyUniquesInArray(allInstanceOfLabels))
-}
-
-
-function emptySearchResults() {
-    resultsFromQuery = [];//empties result array
-    ResultsObject = {};//empties result object
-}
-
-function onlyUniquesInArray(messyArray) {
-    // var names = ["Mike", "Matt", "Nancy", "Adam", "Jenny", "Nancy", "Carl"];
-    var uniqueArray = [];
-    $.each(messyArray, function (i, el) {
-        if ($.inArray(el, uniqueArray) === -1) uniqueArray.push(el);
-    });
-    return uniqueArray;
-}
-
 function buildResultsObject(result) {
     var Q = result.qnumber;
     if (ResultsObject[Q] != undefined) {
@@ -933,121 +844,3 @@ function toggleBlur(element, blurFactor) {
         .css('oFilter', filterVal)
         .css('msFilter', filterVal);
 }
-
-
-
-
-
-
-
-function shuffle(array) {
-    var currentIndex = array.length,
-        temporaryValue,
-        randomIndex;
-
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-        // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-
-        // And swap it with the current element.
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-
-    return array;
-}
-
-function buildimgColumns() {
-    if (!$('.column').length) {
-        $(".moreImages").append("<div class='columnContainer'></div>");
-        for (var i = 0; i < calcNbrOfCollums(); i++) {
-            $(".columnContainer").append("<div class='column'></div>");
-        }
-    }
-    populateColumns();
-}
-function populateColumns() {
-    shuffle(resultsFromQuery);
-    // console.log(resultsFromQuery);
-    // cleanOutColumns();
-    for (img in resultsFromQuery) {
-        if (img > 500) {
-            return;
-        }
-        var col = img % nbrOfColumns;
-        // console.log(col);
-        if (resultsFromQuery[img].imgthum != undefined) {
-            var html =
-                "<img onclick='selectImg(\"" +
-                resultsFromQuery[img].qnumber +
-                "\")' data-qnbr='" +
-                resultsFromQuery[img].qnumber +
-                "' src='" +
-                resultsFromQuery[img].imgthum +
-                "' class='img'>";
-
-            $(".column").eq(col).append(html);
-        }
-    }
-    $(".img").bind("error", function () {
-        // Replacing image source
-        $(this).hide();
-    });
-}
-
-function cleanOutColumns() {
-    $(".column").each(function () {
-        // console.log(this);
-        $(this).html("");
-    });
-}
-
-var nbrOfColumns = 0;
-function calcNbrOfCollums() {
-    nbrOfColumns = ($("body").width() / 250).toFixed(0);
-    return nbrOfColumns;
-}
-
-function selectImg(Q) {
-    console.log(ResultsObject[Q]);
-    cleanOutColumns();
-    $(".selectedImg").html("");
-    var html =
-        "<a href='" +
-        ResultsObject[Q].qnumberURL +
-        "' target='_blank'>" +
-        "<img data-qnbr='" +
-        ResultsObject[Q].qnumber +
-        "' src='" +
-        ResultsObject[Q].img +
-        "' class='bigImg'></a>";
-    $(".selectedImg").append(html);
-    var newQsearchArray = ResultsObject[Q].instanceof
-    console.log(ResultsObject[Q].instanceof)
-    console.log(ResultsObject[Q].instanceofLabel)
-    emptySearchResults();
-    for (s in newQsearchArray) {
-        console.log("Query Start" + newQsearchArray[s])
-        runQuery(newQsearchArray[s])
-    }
-
-
-    $(".bigImg").one("load", function () {
-        // populateColumns();
-    }).each(function () {
-        if (this.complete) {
-            $(this).trigger('load');
-        }
-    });
-}
-
-$("#searchTextImput").keyup(function () {
-    console.log($("#searchTextImput").val())
-    emptySearchResults();
-    cleanOutColumns();
-    runQuery($("#searchTextImput").val())
-    $(".selectedImg").html("");
-});
